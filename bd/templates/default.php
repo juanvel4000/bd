@@ -31,7 +31,7 @@
             margin-bottom: 2em;
         }
 
-        .meta {
+        .post-meta {
             color: #666;
             font-size: 0.9em;
         }
