@@ -7,7 +7,7 @@ function createPost($title, $body, $delkey, $table) {
     db_exec("INSERT INTO posts (name, body, delkey, bd_table) VALUES (?, ?, ?, ?)", [$title, $body, $hashk, $table]);
     return db_last_id();
 }
-function render_template($body = "<h1>test</h1>") {
+function render_template($body = "<h1>test</h1>" ) {
     ob_start();
     global $config;
     $title = $config['title'];
@@ -32,3 +32,8 @@ function comment($post_id, $body, $delkey) {
     db_exec("INSERT INTO replies (post_id, body, delkey) VALUES (?, ?, ?)", [$post_id, $body, $hashk]);
     return db_last_id();
 }
+
+function post_exists($id) {
+    return (bool) db_row("SELECT 1 FROM posts WHERE id = ?", [$id]);
+}
+

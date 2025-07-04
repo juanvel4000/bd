@@ -35,6 +35,15 @@
             color: #666;
             font-size: 0.9em;
         }
+        .cmt {
+            margin-bottom: 2em;
+        }
+
+        .cmt-meta {
+            color: #666;
+            font-size: 0.9em;
+        }
+
 
         pre, textarea {
             background: #f0f0f0;
