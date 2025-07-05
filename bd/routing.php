@@ -20,7 +20,7 @@ $router = new Router();
 $router->get("/", function () {
     global $config;
     $body = "
-            <p>Welcome to <b>bd</b>, an anonymous imageboard platform inspired by one whose name we shall not mention</p>
+            <p>Welcome to <b>bd</b></p>
             <h2>Tables</h2>";
     foreach ($config['tables'] as $table) {
         $body = $body . "<a href='/".$table."' style='text-decoration: none; color: black'><h4>/". $table ."/: ". getTableInfo($table) ."</h4></a>";
