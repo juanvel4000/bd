@@ -1,7 +1,7 @@
 
-# **b**oar**d**
+# **bd**
 
-An anonymous, 4chan-like **imageboard with absolutely no images**
+An anonymous, 4chan-like **imageboard with absolutely no images** written in `php`
 
 ## Overview
 
@@ -13,7 +13,7 @@ An anonymous, 4chan-like **imageboard with absolutely no images**
 - Deletion keys for post/comment management
 ## Acknowledgements
 
- - [bramus/router](https://github.com/bramus/router): Wonderful **routing** system
+ - [bramus/router](https://github.com/bramus/router): Wonderful **routing** system (at `/bd/include/Router.php`)
 ## License
 
 **bd** is licensed with the [MIT License](https://choosealicense.com/licenses/mit/)
