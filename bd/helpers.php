@@ -11,9 +11,13 @@ function getTableInfo($table) {
     global $config;
     return $config['tableinfo'][$table];
 }
-function render_template($body = "<h1>test</h1>" ) {
+function render_template($body = "<h1>test</h1>", $bar = "<a href='/'>/</a>") {
     ob_start();
     global $config;
+    $navbar = "<a href='/'>Home</a>";
+    foreach ($config['tables'] as $table) {
+        $navbar = $navbar . " | <a href='/$table/'>/$table/</a>";
+    }
     $title = $config['title'];
     $desc = $config['description'];
     include $config['theme']; 

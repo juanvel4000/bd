@@ -82,8 +82,11 @@
 </head>
 <body>
     <h1><a href="/"><?= $title ?></a>: <?= $desc ?></h1>
+    <?= $bar ?>
+    <br>
+    <?= $navbar ?>
     <hr>
-
+    
     <?= $body ?>
 
 </body>

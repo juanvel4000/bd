@@ -164,7 +164,7 @@ $router->get("/{table}/{id}/no-comments", function ($table, $id) {
                 <p>".htmlspecialchars($post['body'])."</p>
             </div>";
     }
-    echo render_template($body);
+    echo render_template($body, "<a href='/'>/</a> >> <a href='/$table/'>/$table/</a> >> <a href='/$table/$id/no-comments'>#$id@nc</a>");
 });
 $router->get("/{table}/{id}", function ($table, $id) {
     $ro = db_row("SELECT * FROM posts WHERE bd_table = ? AND id = ?", [$table, $id]);
@@ -219,7 +219,7 @@ $router->get("/{table}/{id}", function ($table, $id) {
                 </div>";
         }
     }
-    echo render_template($body);
+    echo render_template($body, "<a href='/'>/</a> >> <a href='/$table/'>/$table/</a> >> <a href='/$table/$id'>#$id</a>");
 });
 $router->get("/{table}", function ($table) {
     global $config;
@@ -247,7 +247,7 @@ $router->get("/{table}", function ($table) {
             ";
         }
     }
-    echo render_template($body);
+    echo render_template($body, "<a href='/'>/</a> >> <a href='/$table/'>/$table/</a>");
     return;
 });
 $router->run();
