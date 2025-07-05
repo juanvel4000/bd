@@ -182,7 +182,11 @@ $router->get("/{table}/{id}", function ($table, $id) {
                 <div class='post-meta'>
                     <time datetime='".$post['timestamp']."'>".$post['timestamp']."</time>
                     <span class='post-id'>#".$post['id']."</span>
-                    
+                    <form action='/bd-internal/".$table."/".$post['id']."/delete-post' method='POST'>
+                        <input type='password'  name='delkey' placeholder='Deletion Key' required>
+                        <input type='hidden' name='go-to-table' value='1'>
+                        <input type='submit' value='Delete'>
+                    </form>
                 </div>
                 <h1>". htmlspecialchars($post['title']) ."</h1>
                 <p>". htmlspecialchars($post['body']) ."</p>
@@ -204,6 +208,11 @@ $router->get("/{table}/{id}", function ($table, $id) {
                     <div class='cmt-meta'>
                         <time datetime='".$cmt['timestamp']."'>".$cmt['timestamp']."</time>
                         <span class='cmt-id'>#c".$cmt['id']."</span>
+                        <form action='/bd-internal/".$table."/".$cmt['id']."/delete-cmt' method='POST'>
+                            <input type='password'  name='delkey' placeholder='Deletion Key' required>
+                            <input type='hidden' name='go-to-table' value='1'>
+                            <input type='submit' value='Delete'>
+                        </form>
                         Comment
                     </div>
                     <p>".htmlspecialchars($cmt['body'])."</p>

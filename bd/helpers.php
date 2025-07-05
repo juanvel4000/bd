@@ -25,6 +25,7 @@ function deletePost($id, $delkey) {
 
     if (password_verify($delkey, $row['delkey'])) {
         db_exec("DELETE FROM posts WHERE id = ?", [$id]);
+        db_exec("DELETE FROM replies WHERE post_id = ?", [$id]);
         return true;
     }
 
