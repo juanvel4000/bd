@@ -6,6 +6,8 @@ An anonymous, 4chan-like **imageboard with absolutely no images** written in `ph
 ## Overview
 
 **bd** is a minimalist, anonymous imageboard with absolutely **no image support** inspired by early 2000s forums and boards
+
+Check out the [bd.juanvel400.xyz](https://bd.juanvel400.xyz) public instance
 ## Features
 
 - Anonymous posting and commenting
