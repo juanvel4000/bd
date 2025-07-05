@@ -35,14 +35,14 @@
             color: #666;
             font-size: 0.9em;
         }
-        .cmt {
+        /* .cmt {
             margin-bottom: 2em;
-        }
+        } */
 
-        .cmt-meta {
+         .cmt-meta {
             color: #666;
             font-size: 0.9em;
-        }
+        } 
 
 
         pre, textarea {
@@ -81,7 +81,7 @@
     </style>
 </head>
 <body>
-    <h1><a href="/"><?= $title ?></a> <?= $desc ?></h1>
+    <h1><a href="/"><?= $title ?></a>: <?= $desc ?></h1>
     <hr>
 
     <?= $body ?>

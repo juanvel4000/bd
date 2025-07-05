@@ -7,6 +7,10 @@ function createPost($title, $body, $delkey, $table) {
     db_exec("INSERT INTO posts (name, body, delkey, bd_table) VALUES (?, ?, ?, ?)", [$title, $body, $hashk, $table]);
     return db_last_id();
 }
+function getTableInfo($table) {
+    global $config;
+    return $config['tableinfo'][$table];
+}
 function render_template($body = "<h1>test</h1>" ) {
     ob_start();
     global $config;
@@ -26,7 +30,17 @@ function deletePost($id, $delkey) {
 
     return false;
 }
+function deleteComment($id, $delkey) {
+    $row = db_row("SELECT delkey FROM replies WHERE id = ?", [$id]);
+    if (!$row) return false;
 
+    if (password_verify($delkey, $row['delkey'])) {
+        db_exec("DELETE FROM replies WHERE id = ?", [$id]);
+        return true;
+    }
+
+    return false;
+}
 function comment($post_id, $body, $delkey) {
     $hashk = password_hash($delkey, PASSWORD_BCRYPT);
     db_exec("INSERT INTO replies (post_id, body, delkey) VALUES (?, ?, ?)", [$post_id, $body, $hashk]);

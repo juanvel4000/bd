@@ -1,2 +1,4 @@
 .sqlite
 .db
+bd/*.sqlite
+bd/*.db
