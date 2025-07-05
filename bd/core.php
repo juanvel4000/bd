@@ -9,7 +9,7 @@ $tableinfo = [ /* modify this according to your tables */
         "test" => "A testing table"
     ];
 # modifying this might mess up with bd
-
+ 
 return [
     "title" => $title,
     "theme" => __DIR__ . "/templates/" . $theme . ".php",
@@ -18,5 +18,3 @@ return [
     "tables" => $tables,
     "tableinfo" => $tableinfo
 ];
-
-
