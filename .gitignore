@@ -2,3 +2,5 @@
 .db
 bd/*.sqlite
 bd/*.db
+bd/version.php
+VERSION
