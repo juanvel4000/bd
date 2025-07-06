@@ -3,6 +3,10 @@ $config = require 'core.php';
 require_once 'helpers.php';
 require_once 'database.php';
 
+function is_valid_table($table) {
+    global $config;
+    return in_array($table, $config['tables']);
+}
 
 if (php_sapi_name() === 'cli-server') {
     $path = parse_url($_SERVER["REQUEST_URI"], PHP_URL_PATH);
@@ -23,7 +27,7 @@ $router->get("/", function () {
             <p>Welcome to <b>bd</b></p>
             <h2>Tables</h2>";
     foreach ($config['tables'] as $table) {
-        $body = $body . "<a href='/".$table."' style='text-decoration: none; color: black'><h4>/". $table ."/: ". getTableInfo($table) ."</h4></a>";
+        $body = $body . "<h4><a href='/".$table."' style='text-decoration: none; color: black'>/". $table ."/: ". getTableInfo($table) ."</a></h4>";
     }
     echo render_template($body);
     return;
@@ -35,7 +39,7 @@ $router->post("/bd-internal/{table}/post", function ($table) {
     $body = $_POST['body'] ?? '';
 
     header("Content-Type: application/json");
-    if (!in_array($table, $config['tables'])) {
+    if (!is_valid_table($table)) {
         echo json_encode(["error" => true, "message" => "table $table is not a valid table"]);
         return false;
     }
@@ -61,8 +65,12 @@ $router->post("/bd-internal/{table}/{id}/delete-post", function ($table, $id) {
     global $config;
     $delkey = $_POST['delkey'] ?? '';
     header("Content-Type: application/json");
-    if (!in_array($table, $config['tables'])) {
+    if (!is_valid_table($table)) {
         echo json_encode(["error" => true, "message" => "table $table is not a valid table"]);
+        return false;
+    }
+    if (!exists_in_table($id, $table)) {
+        echo json_encode(["error" => true, "message" => ""]);
         return false;
     }
     if (!deletePost($id, $delkey)) {
@@ -81,11 +89,11 @@ $router->post("/bd-internal/{table}/{id}/delete-cmt", function ($table, $id) {
     global $config;
     $delkey = $_POST['delkey'] ?? '';
     header("Content-Type: application/json");
-    if (!in_array($table, $config['tables'])) {
+    if (!is_valid_table($table)) {
         echo json_encode(["error" => true, "message" => "table $table is not a valid table"]);
         return false;
     }
-    if (!deleteComment($id, $delkey)) {
+    if (!deleteComment($id, $delkey, $table)) {
         echo json_encode(["error" => true, "message" => "failed to delete $id, invalid delkey"]);
         return false;
     } else {
@@ -103,8 +111,12 @@ $router->post("/bd-internal/{table}/{id}/comment", function ($table, $id) {
     $body = $_POST['body'] ?? '';
 
     header("Content-Type: application/json");
-    if (!in_array($table, $config['tables'])) {
+    if (!is_valid_table($table)) {
         echo json_encode(["error" => true, "message" => "table $table is not a valid table"]);
+        return false;
+    }
+    if (!exists_in_table($id, $table)) {
+        echo json_encode(["error" => true, "message" => "post does not exist in table"]);
         return false;
     }
     if (!post_exists($id)) {
@@ -134,6 +146,10 @@ $router->get("/{table}/{id}/json", function ($table, $id) {
         echo json_encode(["error" => true, "message" => "post does not exist"]);
         return false;
     }
+    if (!exists_in_table($id, $table)) {
+        echo json_encode(["error" => true, "message" => "post does not exist in table"]);
+        return false;
+    }
     $ro = db_row("SELECT * FROM posts WHERE bd_table = ? AND id = ?", [$table, $id]);
     $post = [
         "id" => $ro['id'],
@@ -144,9 +160,14 @@ $router->get("/{table}/{id}/json", function ($table, $id) {
     return true;
 });
 $router->get("/{table}/{id}/no-comments", function ($table, $id) {
+    if (!exists_in_table($id, $table)) {
+        $body = "<div><h1 style='color: red;'>Error</h1><br><p>#$id not found in $table</p>"; 
+        echo render_template($body);
+        return false;
+    }
     $ro = db_row("SELECT * FROM posts WHERE bd_table = ? AND id = ?", [$table, $id]);
     if (!$ro) {
-        $body = "<div><h1>Error</h1><br><p>Requested post does not exist</p>";
+        $body = "<div><h1 style='color: red;'>Error</h1><br><p>Requested post does not exist</p>";
     } else {
         $post = [
             "id" => $ro['id'],
@@ -167,9 +188,14 @@ $router->get("/{table}/{id}/no-comments", function ($table, $id) {
     echo render_template($body, "<a href='/'>/</a> >> <a href='/$table/'>/$table/</a> >> <a href='/$table/$id/no-comments'>#$id@nc</a>");
 });
 $router->get("/{table}/{id}", function ($table, $id) {
+    if (!exists_in_table($id, $table)) {
+        $body = "<div><h1 style='color: red;'>Error</h1><br><p>#$id not found in $table</p>"; 
+        echo render_template($body);
+        return false;
+    }
     $ro = db_row("SELECT * FROM posts WHERE bd_table = ? AND id = ?", [$table, $id]);
     if (!$ro) {
-        $body = "<div><h1>Error</h1><br><p>Requested post does not exist</p>";
+        $body = "<div><h1 style='color: red;'>Error</h1><br><p>Requested post does not exist</p>";
     } else {
         $post = [
             "id" => $ro['id'],
@@ -223,8 +249,8 @@ $router->get("/{table}/{id}", function ($table, $id) {
 });
 $router->get("/{table}", function ($table) {
     global $config;
-    if (!in_array($table, $config['tables'])) {
-        $body = "<h1>Error</h1><br><p>Table does not exist</p>"; 
+    if (!is_valid_table($table)) {
+        $body = "<h1 style='color: red;'>Error</h1><br><p>Table does not exist</p>"; 
     } else {
         $body = "<h3>/".$table."/: ". getTableInfo($table) ."</h3>";
         $posts = db_all("SELECT id, name FROM posts WHERE bd_table = ? ORDER BY timestamp DESC", [$table]);

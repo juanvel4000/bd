@@ -43,10 +43,13 @@ db_exec("CREATE TABLE IF NOT EXISTS posts (
 );");
 
 db_exec("CREATE TABLE IF NOT EXISTS replies (
-    post_id INTEGER,
+    post_id INTEGER NOT NULL    ,
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     body TEXT NOT NULL,
     delkey TEXT NOT NULL,
     timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );");
+
+db_exec("CREATE INDEX IF NOT EXISTS idx_bd_table_timestamp ON posts(bd_table, timestamp DESC);");
+db_exec("CREATE INDEX IF NOT EXISTS idx_post_id_timestamp ON replies(post_id, timestamp DESC);");
