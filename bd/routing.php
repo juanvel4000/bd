@@ -140,6 +140,54 @@ $router->post("/bd-internal/{table}/{id}/comment", function ($table, $id) {
         return true;
     }
 });
+$router->get('/{table}/rss', function ($table) {
+    global $config;
+    header("Content-Type: application/rss+xml; charset=utf-8");
+    if (!is_valid_table($table)) {
+        echo "<?xml version='1.0' encoding='UTF-8' ?><error error='true'>/$table/ does not exist</error>";
+        return false;
+    }
+
+    $feedUrl = rtrim($config['url'], '/') . '/' . $table . '/';
+    $channelTitle = htmlspecialchars($config['title'] . ' /' . $table . '/', ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    $channelLink = htmlspecialchars($feedUrl, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    $channelDescription = htmlspecialchars($config['tableinfo'][$table] ?? '', ENT_XML1 | ENT_QUOTES, 'UTF-8');
+    $lastBuildDate = date("D, d M Y H:i:s O");
+
+    $body = '<?xml version="1.0" encoding="UTF-8" ?>' . "\n";
+    $body .= "<rss version=\"2.0\">\n<channel>\n";
+    $body .= "<title>$channelTitle</title>\n";
+    $body .= "<link>$channelLink</link>\n";
+    $body .= "<description>$channelDescription</description>\n";
+    $body .= "<language>en-us</language>\n";
+    $body .= "<lastBuildDate>$lastBuildDate</lastBuildDate>\n";
+
+    $posts = db_all("SELECT id, name, body, timestamp FROM posts WHERE bd_table = ? ORDER BY timestamp DESC", [$table]);
+    foreach ($posts as $post) {
+        $pbody = $post['body'];
+        $title = $post['name'];
+        $id = $post['id'];
+        $timestamp = $post['timestamp'];
+        $url = $config['url'] . "/$table/$id";
+        if (strlen($post['body']) > 128) {
+            $pbody = substr($post['body'], 0, 128) . '...';
+        }
+        $pbody = htmlspecialchars($pbody, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $title = htmlspecialchars($title, ENT_XML1 | ENT_QUOTES, 'UTF-8');
+        $pubDate = date("D, d M Y H:i:s O", strtotime($timestamp));
+        $body .= "<item>\n";
+        $body .= "<title>$title</title>\n";
+        $body .= "<link>$url</link>\n";
+        $body .= "<guid>$url</guid>\n";
+        $body .= "<description>$pbody</description>\n";
+        $body .= "<pubDate>$pubDate</pubDate>\n";
+        $body .= "</item>\n";
+    }
+    $body = $body . "</channel>\n</rss>";
+    echo $body;
+    return true;
+
+});
 $router->get("/{table}/{id}/json", function ($table, $id) {
     header("Content-Type: application/json");
     if (!post_exists($id)) {
@@ -161,13 +209,13 @@ $router->get("/{table}/{id}/json", function ($table, $id) {
 });
 $router->get("/{table}/{id}/no-comments", function ($table, $id) {
     if (!exists_in_table($id, $table)) {
-        $body = "<div><h1 style='color: red;'>Error</h1><br><p>#$id not found in $table</p>"; 
+        $body = "<div><h1 class='error'>Error</h1><br><p>#$id not found in $table</p>"; 
         echo render_template($body);
         return false;
     }
     $ro = db_row("SELECT * FROM posts WHERE bd_table = ? AND id = ?", [$table, $id]);
     if (!$ro) {
-        $body = "<div><h1 style='color: red;'>Error</h1><br><p>Requested post does not exist</p>";
+        $body = "<div><h1 class='error'>Error</h1><br><p>Requested post does not exist</p>";
     } else {
         $post = [
             "id" => $ro['id'],
@@ -189,13 +237,13 @@ $router->get("/{table}/{id}/no-comments", function ($table, $id) {
 });
 $router->get("/{table}/{id}", function ($table, $id) {
     if (!exists_in_table($id, $table)) {
-        $body = "<div><h1 style='color: red;'>Error</h1><br><p>#$id not found in $table</p>"; 
+        $body = "<div><h1 class='error'>Error</h1><br><p>#$id not found in $table</p>"; 
         echo render_template($body);
         return false;
     }
     $ro = db_row("SELECT * FROM posts WHERE bd_table = ? AND id = ?", [$table, $id]);
     if (!$ro) {
-        $body = "<div><h1 style='color: red;'>Error</h1><br><p>Requested post does not exist</p>";
+        $body = "<div><h1 class='error'>Error</h1><br><p>Requested post does not exist</p>";
     } else {
         $post = [
             "id" => $ro['id'],
@@ -250,7 +298,7 @@ $router->get("/{table}/{id}", function ($table, $id) {
 $router->get("/{table}", function ($table) {
     global $config;
     if (!is_valid_table($table)) {
-        $body = "<h1 style='color: red;'>Error</h1><br><p>Table does not exist</p>"; 
+        $body = "<h1 class='error'>Error</h1><br><p>Table does not exist</p>"; 
     } else {
         $body = "<h3>/".$table."/: ". getTableInfo($table) ."</h3>";
         $posts = db_all("SELECT id, name FROM posts WHERE bd_table = ? ORDER BY timestamp DESC", [$table]);
@@ -276,5 +324,6 @@ $router->get("/{table}", function ($table) {
     echo render_template($body, "<a href='/'>/</a> >> <a href='/$table/'>/$table/</a>");
     return;
 });
+
 $router->run();
 

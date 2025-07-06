@@ -74,7 +74,9 @@
             border-left: 2px solid #ccc;
             padding-left: 1em;
         }
-
+        .error {
+            color: red;
+        }
         h1, h2, h3 {
             font-size: 1.2em;
         }
